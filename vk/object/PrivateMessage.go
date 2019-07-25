@@ -26,17 +26,18 @@ type MessageAction struct {
 }
 
 type PrivateMessage struct {
-	ID                float64          `json:"id" map:"id"`
-	Date              float64          `json:"date" map:"date"`
-	PeerID            float64          `json:"peer_id" map:"peer_id"`
-	FromID            float64          `json:"from_id" map:"from_id"`
-	UserID            float64          `json:"from_id" map:"from_id"`
-	Text              string           `json:"text" map:"text"`
-	RandomID          float64          `json:"random_id" map:"random_id"`
+	ID                float64           `json:"id" map:"id"`
+	Date              float64           `json:"date" map:"date"`
+	PeerID            float64           `json:"peer_id" map:"peer_id"`
+	FromID            float64           `json:"from_id" map:"from_id"`
+	UserID            float64           `json:"from_id" map:"from_id"`
+	Text              string            `json:"text" map:"text"`
+	RandomID          float64           `json:"random_id" map:"random_id"`
 	Attachments       []*Attachment     `json:"attachments" map:"attachments"`
-	Important         bool             `json:"important" map:"important"`
-	Geo               Geo              `json:"geo" map:"geo"`
-	Payload           string           `json:"payload" map:"payload"`
+	Important         bool              `json:"important" map:"important"`
+	Geo               *Geo              `json:"geo" map:"geo"`
+	Payload           string            `json:"payload" map:"payload"`
 	ForwardedMessages []*PrivateMessage `json:"fwd_messages" map:"fwd_messages"`
-	Action            *MessageAction   `json:"action" map:"action"`
+	ReplyMessage      *PrivateMessage   `json:"reply_message" map:"reply_message"`
+	Action            *MessageAction    `json:"action" map:"action"`
 }
