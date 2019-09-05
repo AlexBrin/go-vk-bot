@@ -6,30 +6,27 @@ import (
 	"time"
 )
 
-func Create(prefix, format string) (l *Log) {
+func Create(format string) (l *Log) {
 	l = &Log{}
-	l.init(prefix, format)
+	l.init(format)
 
 	return
 }
 
 type Log struct {
-	prefix string
 	format string
 }
 
-func (l *Log) prepare(data ...string) (string, string, string, string) {
-	return l.format, l.prefix, l.currentTime(), strings.Join(data, " ")
+func (l *Log) prepare(data ...string) (string, string, string) {
+	return l.format, l.currentTime(), strings.Join(data, " ")
 }
 
-func (l *Log) init(prefix, format string) {
-	l.prefix = prefix
+func (l *Log) init(format string) {
 	l.format = format
 }
 
 func (l *Log) currentTime() string {
-	currentTime := time.Now()
-	return currentTime.Format("2006.01.02 15:04:05")
+	return time.Now().Format("2006.01.02 15:04:05")
 }
 
 func (l *Log) Info(data ...string) {

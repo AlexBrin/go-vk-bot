@@ -36,11 +36,11 @@ func createDecoder(output interface{}) (decoder *mapstructure.Decoder) {
 	return
 }
 
-func CreateBot(groupId, token, version, prefix string) (b *Bot) {
+func CreateBot(groupId, token, version string) (b *Bot) {
 	b = &Bot{
 		groupId: groupId,
 		token: token,
-		logger: log.Create(prefix, "[%s][%s] %s"),
+		logger: log.Create("[%s] %s"),
 		api: vk.Create(token, version),
 
 		commandHandlers: map[string][]handlers.CommandHandler{},
