@@ -23,6 +23,8 @@ type Bot struct {
 	logger  *log.Log
 	api     *vk.API
 
+	prefixList []string
+
 	commandHandlers map[string][]handlers.CommandHandler
 	handlers map[string][]handlers.EventHandler
 }
@@ -43,11 +45,39 @@ func CreateBot(groupId, token, version string) (b *Bot) {
 		logger: log.Create("[%s] %s"),
 		api: vk.Create(token, version),
 
+		prefixList: []string{".", "/"},
+
 		commandHandlers: map[string][]handlers.CommandHandler{},
 		handlers: map[string][]handlers.EventHandler{},
 	}
 
 	return
+}
+
+func (b *Bot) isPrefix(command string) bool {
+	firstSymbol := command[:1]
+
+	for _, prefix := range b.prefixList {
+		if firstSymbol == prefix {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (b *Bot) SetPrefixList(prefixes []string) {
+	b.prefixList = prefixes
+}
+
+func (b *Bot) AddPrefix(prefix string) {
+	if !b.isPrefix(prefix) {
+		b.prefixList = append(b.prefixList, prefix)
+	}
+}
+
+func (b *Bot) GetPrefixList() []string {
+	return b.prefixList
 }
 
 func (b *Bot) GetLogger() *log.Log {
@@ -132,16 +162,23 @@ func (b *Bot) handle(updates []vk.LongPollUpdate) {
 			_ = createDecoder(&pm).Decode(update.Object)
 
 			args := strings.Split(pm.Text, " ")
-			if len(args) >= 1 && b.commandExists(strings.ToLower(args[0])) {
-				var next bool
-				for _, handler := range b.commandHandlers[strings.ToLower(args[0])] {
-					next = handler(args[1:], &event.Command{Command: args[0], Args: args[1:], PrivateMessage: &pm})
-					if !next {
-						break
-					}
+			if len(args) >= 1 {
+				cmd := strings.ToLower(args[0])
+				if b.isPrefix(cmd) {
+					cmd = cmd[1:]
 				}
 
-				continue
+				if b.commandExists(cmd) {
+					var next bool
+					for _, handler := range b.commandHandlers[cmd] {
+						next = handler(args[1:], &event.Command{Command: args[0], Args: args[1:], PrivateMessage: &pm})
+						if !next {
+							break
+						}
+					}
+
+					continue
+				}
 			}
 
 			ev = &event.MessageNew{PrivateMessage: &pm}
