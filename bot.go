@@ -26,7 +26,7 @@ type Bot struct {
 	prefixList []string
 
 	commandHandlers map[string][]handlers.CommandHandler
-	handlers map[string][]handlers.EventHandler
+	handlers        map[string][]handlers.EventHandler
 }
 
 func createDecoder(output interface{}) (decoder *mapstructure.Decoder) {
@@ -41,14 +41,14 @@ func createDecoder(output interface{}) (decoder *mapstructure.Decoder) {
 func CreateBot(groupId, token, version string) (b *Bot) {
 	b = &Bot{
 		groupId: groupId,
-		token: token,
-		logger: log.Create("[%s] %s"),
-		api: vk.Create(token, version),
+		token:   token,
+		logger:  log.Create("[%s] %s"),
+		api:     vk.Create(token, version),
 
 		prefixList: []string{".", "/"},
 
 		commandHandlers: map[string][]handlers.CommandHandler{},
-		handlers: map[string][]handlers.EventHandler{},
+		handlers:        map[string][]handlers.EventHandler{},
 	}
 
 	return
@@ -107,7 +107,7 @@ func (b *Bot) OnCommand(command string, h ...handlers.CommandHandler) {
 	b.commandHandlers[command] = append(b.commandHandlers[command], h...)
 }
 
-func (b *Bot) On(eventType string, h... handlers.EventHandler) {
+func (b *Bot) On(eventType string, h ...handlers.EventHandler) {
 	if !b.handlersExists(eventType) {
 		b.handlers[eventType] = make([]handlers.EventHandler, 0)
 	}
@@ -161,25 +161,24 @@ func (b *Bot) handle(updates []vk.LongPollUpdate) {
 			pm := object.PrivateMessage{}
 			_ = createDecoder(&pm).Decode(update.Object)
 
-			args := strings.Split(pm.Text, " ")
-			if len(args) >= 1 {
+			args := strings.Split(pm.Message.Text, " ")
+			if len(args) >= 1 && args[0] != "" {
 				cmd := strings.ToLower(args[0])
 				if b.isPrefix(cmd) {
 					cmd = cmd[1:]
 				}
 
 				var next bool
+
 				if b.commandExists("*") {
 					for _, handler := range b.commandHandlers["*"] {
-						next = handler(args[1:], &event.Command{Command: args[0], Args: args[1:], PrivateMessage: &pm})
-						if !next {
-							break
+						if b.commandExists(cmd) {
+							next = handler(args[1:], &event.Command{Command: args[0], Args: args[1:], PrivateMessage: &pm})
+							if !next {
+								break
+							}
 						}
 					}
-				}
-
-				if !next {
-					return
 				}
 
 				if b.commandExists(cmd) {
