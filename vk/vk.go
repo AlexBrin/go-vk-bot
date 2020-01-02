@@ -47,7 +47,7 @@ func prepare(params map[string]interface{}) string {
 		case []int:
 			dat := make([]string, 0)
 			for _, v := range value {
-				dat = append(dat, strconv.Itoa(int(v)))
+				dat = append(dat, strconv.Itoa(v))
 			}
 
 			data = append(data, fmt.Sprintf("%s=%s", key, strings.Join(dat, ",")))
@@ -83,7 +83,7 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	if file == nil {
 		log.Println("File is empty")
 		return UploadResponse{
-			Error: "no_file",
+			Error:            "no_file",
 			ErrorDescription: "File is empty",
 		}
 	}
@@ -92,7 +92,7 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	writer := multipart.NewWriter(body)
 	part, _ := writer.CreateFormFile(fieldName, filename)
 	_, _ = io.Copy(part, file)
-	writer.Close()
+	_ = writer.Close()
 
 	req, _ := http.NewRequest("POST", uploadServer, body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -102,7 +102,7 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	if err != nil {
 		log.Println(err)
 		return UploadResponse{
-			Error: "request_error",
+			Error:            "request_error",
 			ErrorDescription: err.Error(),
 		}
 	}
@@ -111,15 +111,15 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	if err != nil {
 		log.Println(err)
 		return UploadResponse{
-			Error: "read_error",
+			Error:            "read_error",
 			ErrorDescription: err.Error(),
 		}
 	}
 	resp.Body.Close()
 
 	response := UploadResponse{}
-	json.Unmarshal(b, &response)
-	json.Unmarshal(b, &response.Response)
+	_ = json.Unmarshal(b, &response)
+	_ = json.Unmarshal(b, &response.Response)
 
 	apiResponse, err := api.request("docs.save", H{
 		"file": response.Response["file"],
@@ -127,7 +127,7 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	if err != nil {
 		log.Println(err)
 		return UploadResponse{
-			Error: "request_error",
+			Error:            "request_error",
 			ErrorDescription: err.Error(),
 		}
 	}
@@ -159,11 +159,38 @@ func (api *API) request(method string, params map[string]interface{}) (resp *Res
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal(body, resp)
+	_ = json.Unmarshal(body, resp)
 
 	return resp, nil
 }
 
 func (api *API) Api(method string, params H) (resp *Response, err error) {
 	return api.request(method, params)
+}
+
+func (api *API) ApiKey(method string, params H, key string) (resp *Response, err error) {
+	resp = &Response{}
+
+	params["access_token"] = key
+	params["v"] = api.version
+
+	url := fmt.Sprintf("https://api.vk.com/method/%s?%s", method, prepare(params))
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal(body, &resp.Raw)
+	if err != nil {
+		return nil, err
+	}
+	_ = json.Unmarshal(body, resp)
+
+	return resp, nil
 }
