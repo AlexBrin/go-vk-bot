@@ -16,18 +16,18 @@ import (
 const (
 	groupID = "group id"
 	token   = "group token"
-	version = "5.100"
+	version = "5.103"
 	prefix  = "MyAwesomeBot"
 )
 
 var bot *govkbot.Bot
 
 func main() {
-	bot = govkbot.CreateBot(groupID, token, version, prefix)
+	bot = govkbot.CreateBot(groupID, token, version)
 
 	// Handling `test` command
 	bot.OnCommand("test", func(args []string, command *event.Command) bool {
-		bot.SendMessage("Hello!", command.PrivateMessage.PeerID, vk.H{})
+		bot.SendMessage("Hello!", command.PrivateMessage.Message.PeerID, vk.H{})
 		return true
 	})
 
