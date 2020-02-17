@@ -2,17 +2,18 @@ package event
 
 const (
 	CommandEvent = "message_command"
+	PayloadEvent = "message_payload"
 
 	// messages
-		// input message
+	// input message
 	MessageNewEvent = "message_new"
-		// output message
+	// output message
 	MessageReplyEvent = "message_reply"
-		// edit message
+	// edit message
 	MessageEditEvent = "message_edit"
-		// subscribe on messages
+	// subscribe on messages
 	MessageAllowEvent = "message_allow"
-		// unsubscribe from messages
+	// unsubscribe from messages
 	MessageDenyEvent = "message_deny"
 
 	// photos

@@ -26,6 +26,7 @@ type Bot struct {
 	prefixList []string
 
 	commandHandlers map[string][]handlers.CommandHandler
+	payloadHandlers map[string][]handlers.PayloadHandler
 	handlers        map[string][]handlers.EventHandler
 }
 
@@ -48,6 +49,7 @@ func CreateBot(groupId, token, version string) (b *Bot) {
 		prefixList: []string{".", "/"},
 
 		commandHandlers: map[string][]handlers.CommandHandler{},
+		payloadHandlers: map[string][]handlers.PayloadHandler{},
 		handlers:        map[string][]handlers.EventHandler{},
 	}
 
@@ -105,6 +107,20 @@ func (b *Bot) OnCommand(command string, h ...handlers.CommandHandler) {
 	}
 
 	b.commandHandlers[command] = append(b.commandHandlers[command], h...)
+}
+
+func (b *Bot) payloadExists(payload string) bool {
+	_, ok := b.payloadHandlers[strings.ToLower(payload)]
+	return ok
+}
+
+func (b *Bot) OnPayload(payload string, h ...handlers.PayloadHandler) {
+	payload = strings.ToLower(payload)
+	if !b.payloadExists(payload) {
+		b.payloadHandlers[payload] = make([]handlers.PayloadHandler, 0)
+	}
+
+	b.payloadHandlers[payload] = append(b.payloadHandlers[payload], h...)
 }
 
 func (b *Bot) On(eventType string, h ...handlers.EventHandler) {
@@ -178,6 +194,34 @@ func (b *Bot) handle(updates []vk.LongPollUpdate) {
 								break
 							}
 						}
+					}
+				}
+
+				if pm.Message.Payload != "" {
+					byt := []byte(pm.Message.Payload)
+					var payload map[string]string
+					if err := json.Unmarshal(byt, &payload); err != nil {
+						b.GetLogger().Error("Error:", "Payload not json format!")
+						return
+					}
+					if b.payloadExists("*") {
+						for _, handler := range b.payloadHandlers["*"] {
+							next = handler(payload, &event.Payload{Payload: payload, PrivateMessage: &pm})
+							if !next {
+								break
+							}
+						}
+					}
+
+					if b.payloadExists(payload["command"]) {
+						for _, handler := range b.payloadHandlers[payload["command"]] {
+							next = handler(payload, &event.Payload{Payload: payload, PrivateMessage: &pm})
+							if !next {
+								break
+							}
+						}
+
+						continue
 					}
 				}
 

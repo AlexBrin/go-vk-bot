@@ -7,7 +7,7 @@ type LongPollUpdate struct {
 }
 
 type LongPollResponse struct {
-	TS string `json:"ts"`
+	TS      string           `json:"ts"`
 	Updates []LongPollUpdate `json:"updates"`
-	Failed float64 `json:"failed"`
+	Failed  float64          `json:"failed"`
 }

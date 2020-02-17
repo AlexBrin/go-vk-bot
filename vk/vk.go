@@ -121,6 +121,10 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 	_ = json.Unmarshal(b, &response)
 	_ = json.Unmarshal(b, &response.Response)
 
+	return response
+	fmt.Println("post return")
+
+	fmt.Println(response)
 	apiResponse, err := api.request("docs.save", H{
 		"file": response.Response["file"],
 	})
@@ -131,7 +135,7 @@ func (api *API) Upload(uploadServer, filename, fieldName string, file *os.File) 
 			ErrorDescription: err.Error(),
 		}
 	}
-
+	fmt.Println(apiResponse)
 	response.Response = apiResponse.Raw["response"].(map[string]interface{})
 
 	return response
