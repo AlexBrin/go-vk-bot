@@ -1,0 +1,14 @@
+Log:
+  Level: 4 # 0 - panic, 1 - fatal, 2 - error, 3 - warn, 4 - info, 5 - debug, 6 - trace
+
+Bot:
+  Goroutine: false # Обрабатывать ли события асинхронно
+
+Vk:
+  Token: ''
+  GroupId: 0
+  Command:
+    Prefix:
+      - '/'
+      - '.'
+      - '!'

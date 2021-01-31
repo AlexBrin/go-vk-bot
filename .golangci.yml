@@ -1,0 +1,65 @@
+linters:
+  disable-all: true
+  fast: false
+  enable:
+    - bodyclose
+    - deadcode
+    - errcheck
+    - gochecknoglobals
+    - goconst
+    - gocritic
+    - gofmt
+    - goimports
+    - golint
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - maligned
+    - misspell
+    - nakedret
+    - prealloc
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+    - wsl
+    - godot
+    - asciicheck
+    - nolintlint
+    - gofumpt
+    - goerr113
+    - tparallel
+    - errorlint
+    - paralleltest
+
+issues:
+  exclude-rules:
+    - linters:
+        - golint
+      text: "var.*should|type.*should|struct field.*should|method.*should|func.*should|const.*should|type.*consider|func.*consider"
+
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+
+    - linters:
+        - errcheck
+      source: ".((os\\.)?std(out|err)\\..*|.*Close|.*Flush|os\\.Remove(All)?|
+                .*printf?|os\\.(Un)?Setenv)."
+
+
+    - linters:
+        - stylecheck
+      text: "ST1003:.*(Ts|ts).*TS"
+
+  exclude-use-default: false
