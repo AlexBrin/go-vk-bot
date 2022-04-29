@@ -1,4 +1,4 @@
-module github.com/AlexBrin/go-vkbot
+module github.com/AlexBrin/go-vk-bot
 
 go 1.15
 
